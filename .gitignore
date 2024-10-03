@@ -3,3 +3,6 @@
 ################################################################################
 
 /.vs/AuditingRecordApp
+/.vs/ProjectEvaluation
+*.name
+/.idea/.idea.AuditingRecordApp/.idea/vcs.xml
