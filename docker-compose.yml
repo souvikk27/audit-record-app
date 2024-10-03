@@ -1,0 +1,31 @@
+﻿services:
+  auditingrecordapp:
+    image: auditingrecordapp
+    container_name: auditing-record-app
+    build:
+      context: .
+      dockerfile: AuditingRecordApp/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Release
+    depends_on:
+      - auditingrecordapp-db
+    ports:
+      - "8080:80"
+      - "8081:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+    volumes:
+      - ~/.aspnet/https:/root/.aspnet/https:ro
+      - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
+  auditingrecordapp-db:
+      image: postgres:latest
+      container_name: AuditingRecordApp-db
+      environment:
+        - POSTGRES_DB=AuditingRecordApp
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+      volumes:
+        - ./.containers/database:/var/lib/postgresql/data
+      ports:
+        - 5432:5432
