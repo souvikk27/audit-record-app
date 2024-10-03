@@ -2,6 +2,7 @@
 using AuditingRecordApp.Entity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuditingRecordApp.Controllers
 {
@@ -22,9 +23,11 @@ namespace AuditingRecordApp.Controllers
         [Route("create")]
         public async Task<IActionResult> Create([FromBody] ElectricianParameter parameter)
         {
-            var office = Office.Create("JJ Consulting", "123 Main St Nashville", "123-456-7890");
-            _context.Offices.Add(office);
-            await _context.SaveChangesAsync();
+            var office = _context.Offices.FirstOrDefault(x => x.Name == parameter.Name);
+            if (office == null)
+            {
+                return NotFound($"Office {parameter.Name} not found");
+            }
 
             var electrician = new Electrician
             {
@@ -35,10 +38,40 @@ namespace AuditingRecordApp.Controllers
                 Office = office
             };
 
-            _context.Electricians.Add(electrician); 
+            await _context.Electricians.AddAsync(electrician);
             await _context.SaveChangesAsync();
 
             return Ok("electrician created");
+        }
+        
+        [HttpGet]
+        [Authorize]
+        [Route("get")]
+        public async Task<IActionResult> Get()
+        {
+            var electricians = await _context.Electricians.AsNoTracking().ToListAsync();
+            return Ok(electricians);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("update")]
+        public async Task<IActionResult> Update([FromBody] ElectricianParameter parameter)
+        {
+            var electrician = await _context.Electricians.FindAsync(parameter.Name);
+            if (electrician == null)
+            {
+                return NotFound();
+            }
+
+            electrician.Name = parameter.Name;
+            electrician.Phone = parameter.PhoneNumber;
+            electrician.Email = parameter.Email;
+            electrician.IsAvailable = parameter.IsAvailable;
+            _context.Electricians.Entry(electrician).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return Ok("electrician updated");
         }
     }
 
