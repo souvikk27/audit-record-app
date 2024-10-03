@@ -67,6 +67,6 @@ public static class ServiceExtensions
                 };
             });
 
-        services.AddSingleton<IJwtTokenProvider, JwtTokenProvider>();
+        services.AddTransient<IJwtTokenProvider, JwtTokenProvider>();
     }
 }

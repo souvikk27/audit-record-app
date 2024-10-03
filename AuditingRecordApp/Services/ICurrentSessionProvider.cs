@@ -7,7 +7,7 @@ public interface ICurrentSessionProvider
     Guid? GetUserId();
 }
 
-public class CurrentSessionProvider : ICurrentSessionProvider
+internal sealed class CurrentSessionProvider : ICurrentSessionProvider
 {
     private readonly Guid? _currentUserId;
 

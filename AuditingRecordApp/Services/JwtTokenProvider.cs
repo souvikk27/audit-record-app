@@ -13,7 +13,7 @@ public interface IJwtTokenProvider
 }
 
 
-public sealed class JwtTokenProvider : IJwtTokenProvider
+internal sealed class JwtTokenProvider : IJwtTokenProvider
 {
     private readonly IConfiguration _configuration;
 
