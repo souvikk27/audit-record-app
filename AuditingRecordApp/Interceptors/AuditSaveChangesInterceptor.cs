@@ -1,6 +1,9 @@
-﻿using AuditingRecordApp.Entity;
+﻿using System.Security.Claims;
+using AuditingRecordApp.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+
+#nullable disable
 
 namespace AuditingRecordApp.Interceptors;
 
@@ -32,19 +35,40 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
                 EntityState.Deleted)
             .ToList();
 
+        var userName = GetUserName();
+
+        if (userName is null or "Anonymous")
+        {
+            _logger.LogError("User name not found or anonymous user");
+            userName = "system";
+        }
+
 
         foreach (var entry in entries)
         {
             if (entry.State == EntityState.Added)
             {
                 entry.Entity.CreatedAt = DateTime.UtcNow;
+                entry.Entity.CreatedBy = userName;
             }
             else if (entry.State == EntityState.Modified)
             {
                 entry.Entity.UpdatedAt = DateTime.UtcNow;
+                entry.Entity.UpdatedBy = userName;
             }
         }
 
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
+    }
+
+    private string GetUserName()
+    {
+        return _httpContextAccessor.HttpContext!.User.Identity is not { IsAuthenticated: true }
+            ? "Anonymous"
+            : _httpContextAccessor.HttpContext?.User?.Identities
+                .FirstOrDefault()?
+                .Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?
+                .Value;
     }
 }

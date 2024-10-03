@@ -13,7 +13,12 @@ internal sealed class CurrentSessionProvider : ICurrentSessionProvider
 
     public CurrentSessionProvider(IHttpContextAccessor accessor)
     {
-        var userId = accessor.HttpContext?.User.FindFirstValue("userid");
+        var userId = accessor.HttpContext?.User?.Identities
+            .FirstOrDefault()?
+            .Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?
+            .Value;
+
         if (userId is null)
         {
             return;
