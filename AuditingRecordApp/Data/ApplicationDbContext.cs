@@ -12,6 +12,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     {
     }
     
+    public DbSet<AuditTrails> AuditTrails { get; set; }  
     public DbSet<Office> Offices { get; set; }
     public DbSet<Electrician> Electricians { get; set; }
     public DbSet<Repair> Repairs { get; set; }
@@ -19,13 +20,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<ApplicationUser>().ToTable("Users");
-        modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
-        modelBuilder.Entity<IdentityUserRole<string>>(entity => { entity.ToTable("UserRoles"); });
-        modelBuilder.Entity<IdentityUserClaim<string>>(entity => { entity.ToTable("UserClaims"); });
-        modelBuilder.Entity<IdentityUserLogin<string>>(entity => { entity.ToTable("UserLogins"); });
-        modelBuilder.Entity<IdentityRoleClaim<string>>(entity => { entity.ToTable("RoleClaims"); });
-        modelBuilder.Entity<IdentityUserToken<string>>(entity => { entity.ToTable("UserTokens"); });
+        modelBuilder.Entity<ApplicationUser>().ToTable("users");
+        modelBuilder.Entity<ApplicationRole>().ToTable("roles");
+        modelBuilder.Entity<IdentityUserRole<string>>(entity => { entity.ToTable("user_roles"); });
+        modelBuilder.Entity<IdentityUserClaim<string>>(entity => { entity.ToTable("user_claims"); });
+        modelBuilder.Entity<IdentityUserLogin<string>>(entity => { entity.ToTable("user_logins"); });
+        modelBuilder.Entity<IdentityRoleClaim<string>>(entity => { entity.ToTable("role_claims"); });
+        modelBuilder.Entity<IdentityUserToken<string>>(entity => { entity.ToTable("user_tokens"); });
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
     }
 }
