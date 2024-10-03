@@ -16,7 +16,7 @@ public static class ServiceExtensions
     public static void ConfigureDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHttpContextAccessor();
-        services.AddScoped<AuditService>();
+        services.AddScoped<ICurrentSessionProvider, CurrentSessionProvider>();
         services.AddScoped<AuditSaveChangesInterceptor>();
 
         var connectionString = configuration.GetConnectionString("SqlConnection") ??
@@ -31,7 +31,8 @@ public static class ServiceExtensions
             var interceptor = provider.GetService<AuditSaveChangesInterceptor>()
                               ?? throw new NullReferenceException(nameof(AuditSaveChangesInterceptor));
 
-            options.UseNpgsql(connectionString)
+            options.EnableSensitiveDataLogging()
+                .UseNpgsql(dataSourceBuilder.Build())
                 .AddInterceptors(interceptor)
                 .UseSnakeCaseNamingConvention();
         });
@@ -65,5 +66,7 @@ public static class ServiceExtensions
                         new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AuthConfiguration:Key"]!))
                 };
             });
+
+        services.AddSingleton<IJwtTokenProvider, JwtTokenProvider>();
     }
 }

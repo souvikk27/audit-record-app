@@ -7,7 +7,13 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AuditingRecordApp.Services;
 
-public sealed class JwtTokenProvider
+public interface IJwtTokenProvider
+{
+    string GetToken(ApplicationUser user);
+}
+
+
+public sealed class JwtTokenProvider : IJwtTokenProvider
 {
     private readonly IConfiguration _configuration;
 
