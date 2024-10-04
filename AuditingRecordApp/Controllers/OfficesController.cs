@@ -22,7 +22,12 @@ namespace AuditingRecordApp.Controllers
         [Route("create")]
         public async Task<IActionResult> Create([FromBody] OfficeParameter parameter)
         {
-            var office = Office.Create(parameter.Name, parameter.Address, parameter.Phone);
+            var office = Office.Create(
+                Guid.NewGuid(), 
+                parameter.Name, 
+                parameter.Address, 
+                parameter.Phone);
+
             await _context.Offices.AddAsync(office);
             await _context.SaveChangesAsync();
             return Ok("Office has been created");

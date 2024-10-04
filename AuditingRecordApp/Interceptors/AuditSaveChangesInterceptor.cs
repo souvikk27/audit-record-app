@@ -1,5 +1,5 @@
-﻿using System.Security.Claims;
-using AuditingRecordApp.Entity;
+﻿using AuditingRecordApp.Entity;
+using AuditingRecordApp.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -9,15 +9,15 @@ namespace AuditingRecordApp.Interceptors;
 
 public class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<AuditSaveChangesInterceptor> _logger;
+    private ICurrentSessionProvider _currentSessionProvider;
 
     public AuditSaveChangesInterceptor(
         ILogger<AuditSaveChangesInterceptor> logger,
-        IHttpContextAccessor httpContextAccessor)
+        ICurrentSessionProvider currentSessionProvider)
     {
         _logger = logger;
-        _httpContextAccessor = httpContextAccessor;
+        _currentSessionProvider = currentSessionProvider;
     }
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -35,7 +35,7 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
                 EntityState.Deleted)
             .ToList();
 
-        var userName = GetUserName();
+        var userName = _currentSessionProvider.GetUserId().ToString();
 
         if (userName is null or "Anonymous")
         {
@@ -46,29 +46,19 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
 
         foreach (var entry in entries)
         {
-            if (entry.State == EntityState.Added)
+            switch (entry.State)
             {
-                entry.Entity.CreatedAt = DateTime.UtcNow;
-                entry.Entity.CreatedBy = userName;
-            }
-            else if (entry.State == EntityState.Modified)
-            {
-                entry.Entity.UpdatedAt = DateTime.UtcNow;
-                entry.Entity.UpdatedBy = userName;
+                case EntityState.Added:
+                    entry.Entity.CreatedAt = DateTime.UtcNow;
+                    entry.Entity.CreatedBy = userName;
+                    break;
+                case EntityState.Modified:
+                    entry.Entity.UpdatedAt = DateTime.UtcNow;
+                    entry.Entity.UpdatedBy = userName;
+                    break;
             }
         }
 
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
-    }
-
-    private string GetUserName()
-    {
-        return _httpContextAccessor.HttpContext!.User.Identity is not { IsAuthenticated: true }
-            ? "Anonymous"
-            : _httpContextAccessor.HttpContext?.User?.Identities
-                .FirstOrDefault()?
-                .Claims
-                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?
-                .Value;
     }
 }

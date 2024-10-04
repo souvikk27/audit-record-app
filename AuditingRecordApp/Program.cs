@@ -1,4 +1,5 @@
 using AuditingRecordApp.Extensions;
+using AuditingRecordApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -20,4 +21,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+await app.Services.SeedDatabase();
+
 app.Run();

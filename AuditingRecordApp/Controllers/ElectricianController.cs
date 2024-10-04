@@ -23,7 +23,10 @@ namespace AuditingRecordApp.Controllers
         [Route("create")]
         public async Task<IActionResult> Create([FromBody] ElectricianParameter parameter)
         {
-            var office = _context.Offices.FirstOrDefault(x => x.Name == parameter.Name);
+            var office = _context
+                .Offices
+                .FirstOrDefault(x => x.Name == parameter.OfficeName);
+
             if (office == null)
             {
                 return NotFound($"Office {parameter.Name} not found");
@@ -79,6 +82,7 @@ namespace AuditingRecordApp.Controllers
         string Name,
         string PhoneNumber,
         string Email,
-        bool IsAvailable
+        bool IsAvailable,
+        string OfficeName
     );
 }

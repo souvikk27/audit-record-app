@@ -12,11 +12,15 @@ public sealed class Office : AuditableBaseEntity
     [JsonIgnore]
     public ICollection<Electrician> Electricians { get; set; }
 
-    public static Office Create(string name, string address, string phone)
+    public static Office Create(
+        Guid id,
+        string name, 
+        string address, 
+        string phone)
     {
         return new Office
         {
-            Id = Guid.NewGuid(),
+            Id = id,
             Name = name,
             Address = address,
             Phone = phone
