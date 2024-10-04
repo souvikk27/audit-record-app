@@ -1,7 +1,6 @@
 ﻿using AuditingRecordApp.Data;
 using AuditingRecordApp.Entity;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
